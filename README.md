@@ -4,7 +4,7 @@ API REST de gestión de caballos con Node.js puro, el módulo nativo `http` y Po
 
 ## Estado de implementación
 
-Etapas 1 y 2 verificadas por el usuario: contenedores `equi-postgres` y `equi-api` saludables, PostgreSQL persistente con 10 caballos, consulta de Zafiro mediante `/api/caballos/3` y pruebas de integración CRUD exitosas. Etapa 3: publicación del código fuente en GitHub. Render y n8n aún no están desplegados.
+Etapas 1 y 2 verificadas por el usuario: contenedores `equi-postgres` y `equi-api` saludables, PostgreSQL persistente con 10 caballos, consulta de Zafiro mediante `/api/caballos/3` y pruebas de integración CRUD exitosas. Etapa 3 completada: [repositorio público en GitHub](https://github.com/Aripe09/equi-api-node-postgres), rama `main`, archivos remotos comprobados y `.env` excluido. Render y n8n aún no están desplegados.
 
 ## Objetivo y tecnologías
 
@@ -79,7 +79,6 @@ El primer intento de `docker version` detectó el cliente instalado y Compose v5
 
 ## Etapas siguientes
 
-3. Publicar y comprobar el repositorio público `Aripe09/equi-api-node-postgres`.
 4. Render y PostgreSQL remoto independiente, con inicialización controlada.
 5. n8n en Docker y workflows HTTP importables.
 
@@ -203,7 +202,7 @@ El usuario confirmó que la API local responde con los datos de PostgreSQL, que 
 
 ## Publicación en GitHub
 
-El repositorio se publicará como `Aripe09/equi-api-node-postgres`, con la rama `main`. Se incluyen el Dockerfile, ambos Compose, el esquema y las semillas ficticias, código Node.js, pruebas y documentación. Los registros reales del volumen PostgreSQL no se almacenan en Git ni se sincronizan al publicar el código.
+Repositorio publicado: [Aripe09/equi-api-node-postgres](https://github.com/Aripe09/equi-api-node-postgres), rama `main`. Se incluyen el Dockerfile, ambos Compose, el esquema y las semillas ficticias, código Node.js, pruebas y documentación. Los registros reales del volumen PostgreSQL no se almacenan en Git ni se sincronizan al publicar el código.
 
 `.gitignore` excluye `.env`, variantes de entorno (excepto `.env.example`), claves privadas, carpetas de credenciales, dependencias, respaldos, bases locales y temporales. `.dockerignore` también excluye esos archivos del contexto de construcción.
 
@@ -222,8 +221,20 @@ git ls-remote origin refs/heads/main
 
 En equipos nuevos, `gh auth login --hostname github.com --git-protocol https --web` permite autenticar GitHub CLI mediante el navegador. No pegar tokens en comandos, archivos del proyecto ni mensajes.
 
+Para clonar en una carpeta nueva:
+
+```bat
+git clone https://github.com/Aripe09/equi-api-node-postgres.git
+cd equi-api-node-postgres
+copy .env.example .env
+notepad .env
+docker compose up -d --build --wait --wait-timeout 180
+```
+
+Antes de arrancar, sustituir los secretos de ejemplo en el editor. Estos comandos de copia son para instalaciones nuevas; conservar `.env` y el volumen en la instalación actual.
+
 ## Siguiente etapa: Render
 
-Después de verificar la publicación en GitHub se preparará el servicio web desde `main` y una instancia PostgreSQL remota independiente. El proceso deberá utilizar `DATABASE_URL`, SSL cuando corresponda, puerto dinámico, escucha en `0.0.0.0` y healthcheck `/api/health`.
+La publicación en GitHub está verificada. La [preparación de Render](docs/RENDER.md) describe el servicio web desde `main`, PostgreSQL remoto, variables, cambios pendientes y comprobaciones. La configuración actual de base de datos usa variables `PG*`; el soporte de `DATABASE_URL` y las migraciones remotas se implementarán y probarán en la etapa 4 antes del despliegue.
 
 La inicialización remota debe ser controlada y ejecutarse una sola vez mediante migraciones. No se debe ejecutar `database/init.sql` indiscriminadamente en cada despliegue ni conectar Render a `postgres:5432` de la red local. La base local seguirá intacta; cualquier sincronización de datos entre entornos requiere una decisión explícita. Render y n8n permanecen pendientes.
