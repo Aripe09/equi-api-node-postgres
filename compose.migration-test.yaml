@@ -1,0 +1,20 @@
+# Exclusivamente pruebas aisladas: no monta equi_postgres_data ni publica puertos.
+services:
+  migration-postgres:
+    image: postgres:17.11-bookworm
+    environment:
+      POSTGRES_DB: equi_migration_test
+      POSTGRES_USER: ${POSTGRES_USER:?Configura POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configura POSTGRES_PASSWORD}
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - equi
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d equi_migration_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+  api-tests:
+    environment:
+      MIGRATION_TEST_HOST: migration-postgres

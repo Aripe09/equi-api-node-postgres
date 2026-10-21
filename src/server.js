@@ -1,6 +1,8 @@
 import { createApp } from './app.js';
 import { createPool } from './config/database.js';
 import { createRepository } from './repositories/caballosRepository.js';
+import { migrationsEnabled } from './config/connectionOptions.js';
+import { runMigrations } from './database/migrate.js';
 
 const port = Number(process.env.PORT || 3000);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT invalido');
@@ -13,6 +15,10 @@ const server = createApp({
 });
 
 try {
+  if (migrationsEnabled()) {
+    const applied = await runMigrations(pool);
+    console.log(JSON.stringify({ event: 'migrations_complete', applied }));
+  }
   await pool.query('SELECT 1 FROM caballos LIMIT 1');
   server.listen(port, '0.0.0.0', () => console.log(JSON.stringify({ event: 'listening', port })));
 } catch (error) {

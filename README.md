@@ -95,7 +95,7 @@ Windows: localhost:5433 -> contenedor postgres:5432 -> equi_postgres_data
 
 `src/server.js` configura el pool y el cierre ordenado. `src/app.js` crea el servidor HTTP. Las rutas, controladores, validación y repositorio SQL se encuentran en carpetas separadas. Todas las consultas con datos del cliente usan parámetros `$1`, `$2`, etc. El pool tiene límites de conexiones y tiempos de espera. Los errores no exponen SQL ni secretos.
 
-El arranque de la API no crea bases, tablas, usuarios ni semillas; comprueba la tabla `caballos` existente. El contenedor de la API espera el healthcheck de PostgreSQL. La imagen de Node se construye con `npm ci`; Node.js y npm solo son necesarios dentro de Docker. La aplicación se ejecuta como usuario `node`, con sistema de archivos de solo lectura, sin capacidades Linux y escucha en `0.0.0.0` usando `process.env.PORT` (3000 por defecto).
+El arranque local de la API no crea bases, tablas, usuarios ni semillas; comprueba la tabla `caballos` existente. El contenedor de la API espera el healthcheck de PostgreSQL. La imagen de Node se construye con `npm ci`; Node.js y npm solo son necesarios dentro de Docker. La aplicación se ejecuta como usuario `node`, con sistema de archivos de solo lectura, sin capacidades Linux y escucha en `0.0.0.0` usando `process.env.PORT` (3000 por defecto). En Render, `RUN_MIGRATIONS=true` habilita migraciones versionadas exclusivamente sobre una `DATABASE_URL` explicita.
 
 ## Variables de entorno
 
@@ -235,6 +235,6 @@ Antes de arrancar, sustituir los secretos de ejemplo en el editor. Estos comando
 
 ## Siguiente etapa: Render
 
-La publicación en GitHub está verificada. La [preparación de Render](docs/RENDER.md) describe el servicio web desde `main`, PostgreSQL remoto, variables, cambios pendientes y comprobaciones. La configuración actual de base de datos usa variables `PG*`; el soporte de `DATABASE_URL` y las migraciones remotas se implementarán y probarán en la etapa 4 antes del despliegue.
+La publicación en GitHub está verificada. La [guia de Render](docs/RENDER.md) describe el Blueprint `render.yaml`, PostgreSQL remoto, variables, planes y pasos del panel. Ya se implementaron `DATABASE_URL`, TLS y migraciones transaccionales con historial y semillas una sola vez. Sin `DATABASE_URL`, la conexion local conserva `postgres:5432` y las credenciales `PG*`. Los recursos de Render aun requieren autorizacion y creacion: no se afirma que exista una URL publica funcionando.
 
 La inicialización remota debe ser controlada y ejecutarse una sola vez mediante migraciones. No se debe ejecutar `database/init.sql` indiscriminadamente en cada despliegue ni conectar Render a `postgres:5432` de la red local. La base local seguirá intacta; cualquier sincronización de datos entre entornos requiere una decisión explícita. Render y n8n permanecen pendientes.

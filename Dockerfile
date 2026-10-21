@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --chown=node:node src ./src
+COPY --chown=node:node database/migrations ./database/migrations
+COPY --chown=node:node scripts ./scripts
 USER node
 
 FROM base AS test

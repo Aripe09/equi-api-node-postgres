@@ -1,0 +1,34 @@
+name: EquiAPI Docker CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  docker-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Crear entorno efimero de pruebas
+        shell: bash
+        run: |
+          umask 077
+          printf 'POSTGRES_USER=equi_ci\nPOSTGRES_PASSWORD=%s\nAPI_KEY=%s\n' "$(openssl rand -hex 24)" "$(openssl rand -hex 32)" > .env
+      - name: Construir y arrancar API local aislada
+        run: docker compose up -d --build --wait --wait-timeout 180
+      - name: Construir pruebas
+        run: docker compose -f compose.yaml -f compose.test.yaml --profile test build api-tests
+      - name: Pruebas unitarias HTTP y configuracion
+        run: docker compose -f compose.yaml -f compose.test.yaml --profile test run --rm --no-deps api-tests npm test
+      - name: CRUD real PostgreSQL
+        run: docker compose -f compose.yaml -f compose.test.yaml --profile test run --rm --no-deps api-tests npm run test:integration
+      - name: Arrancar PostgreSQL desechable para migraciones
+        run: docker compose -f compose.yaml -f compose.test.yaml -f compose.migration-test.yaml --profile test up -d --wait migration-postgres
+      - name: Migraciones reales y semillas idempotentes
+        run: docker compose -f compose.yaml -f compose.test.yaml -f compose.migration-test.yaml --profile test run --rm --no-deps api-tests npm run test:migrations
+      - name: Diagnostico si falla
+        if: failure()
+        run: docker compose logs --tail 150 api postgres
