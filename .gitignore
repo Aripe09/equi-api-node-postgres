@@ -1,0 +1,34 @@
+.env
+.env.*
+!.env.example
+node_modules/
+coverage/
+*.log
+*.dump
+*.backup
+work/
+# Credenciales y claves privadas
+secrets/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+.npmrc
+.netrc
+# Datos locales, respaldos y archivos temporales
+*.sql.gz
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.tmp
+*.temp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

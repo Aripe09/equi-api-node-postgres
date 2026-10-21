@@ -1,0 +1,17 @@
+# Usar junto con compose.yaml. El perfil test no inicia con un up normal.
+services:
+  api-tests:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: equi_db
+      PGUSER: ${POSTGRES_USER:?Configura POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Configura POSTGRES_PASSWORD}
+      API_KEY: ${API_KEY:?Configura API_KEY}
+      TEST_BASE_URL: http://api:3000
+    networks:
+      - equi
